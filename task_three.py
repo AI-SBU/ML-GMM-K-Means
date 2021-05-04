@@ -1,19 +1,15 @@
 from sklearn.cluster import KMeans
-from task_two import scatter_plot
+from sklearn.metrics import silhouette_score
+from plot import Plot
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-sns.set_style("dark")
 
 df = pd.read_csv("mvn_data_200_samples.csv")
 
 km = KMeans(n_clusters=2)
-
 km.fit(df)
-
 predict = km.predict(df)
 
-print(predict)
+df["Predict"] = predict
 
-# scatter_plot(df, "KMeans Clustering")
+Plot(df, "KMeans Clustering", predict).scatter_plot()
+print("Silhouette Score", silhouette_score(df, predict))

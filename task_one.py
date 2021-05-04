@@ -1,63 +1,12 @@
 from gen_data import MVN
-import matplotlib.pyplot as plt
+from plot import scatter_sub_plot
+from plot import hist_sub_plot
 import numpy as np
 import pandas as pd
 
 import seaborn as sns
 
 sns.set_style("dark")
-
-'''
-The function below takes in 3 dataset as parameters and constructs
-scatter plots. All of the scatter plots are within the same figure.
-Subplot was used to achieve this.
-'''
-
-
-def scatter_plot(_data_one, _data_two, _data_three):
-    plt.figure(figsize=(10, 10))
-    plt.subplot(2, 2, 1)
-    sns.scatterplot(data=_data_one)
-    plt.title("Class One")
-    plt.xlabel("Range")
-
-    plt.subplot(2, 2, 2)
-    sns.scatterplot(data=_data_two)
-    plt.title("Class Two")
-    plt.xlabel("Range")
-
-    plt.subplot(2, 2, 3)
-    sns.scatterplot(data=_data_three)
-    plt.title("Combined Classes")
-    plt.xlabel("Range")
-
-    plt.show()
-
-
-'''
-The function below takes in a dataset as a parameter and constructs
-histograms of the dataset as well as each of the columns in that dataset.
-All of the histograms are within the same figure. Subplot was used to achieve this.
-'''
-
-
-def hist_plot(_data):
-    plt.figure(figsize=(10, 10))
-    plt.subplot(2, 2, 1)
-    sns.histplot(data=_data.X1, bins=25, kde=True)
-    plt.title("Class One")
-
-    plt.subplot(2, 2, 2)
-    sns.histplot(data=_data.X2, bins=25, kde=True)
-    plt.title("Class Two")
-
-    plt.subplot(2, 2, 3)
-    sns.histplot(data=_data, bins=25, kde=True)
-    plt.title("Class One & Two")
-    plt.xlabel("X1 & X2")
-
-    plt.show()
-
 
 # initializing the parameters
 mu_one = np.array([-1.0, -1.5])
@@ -82,5 +31,5 @@ class_two.columns = ["X1", "X2"]
 # writing the combined data of both classes to a file
 combined_class.to_csv("mvn_data_200_samples.csv", index=False, header=True)
 
-scatter_plot(class_one, class_two, combined_class)
-hist_plot(combined_class)
+scatter_sub_plot(class_one, class_two, combined_class)
+hist_sub_plot(combined_class)
