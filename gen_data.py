@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.stats import multivariate_normal
+
 
 class MVN:
     def __init__(self, mean, cov, n_samples):
