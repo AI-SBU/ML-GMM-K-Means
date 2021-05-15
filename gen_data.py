@@ -1,5 +1,12 @@
 import numpy as np
 
+'''
+The class below contains a function which is used to generate samples
+from multivariate normal distribution
+Three parameters are needed to construct an object of this class
+The parameters are : mean, covariance and number of samples, respectively
+'''
+
 
 class MVN:
     def __init__(self, mean, cov, n_samples):
