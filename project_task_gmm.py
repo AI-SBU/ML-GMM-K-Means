@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+from sklearn.mixture import GaussianMixture
 from sklearn.metrics import silhouette_score, silhouette_samples
 from plot import Plot
 
 
-class KMeansTwoFeatures:
+class TwoFeatureClustering:
     def __init__(self, _df, _cluster_range):
         self.df = _df
         self.cluster_range = _cluster_range
@@ -24,7 +25,7 @@ class KMeansTwoFeatures:
     the number of optimal clusters given a dataset
     '''
 
-    def elbow_method(self):
+    def elbow_method_kmeans(self):
         # sum of squares within clusters
         sswc = []
         # creates a model with clusters corresponding to each element in
@@ -36,10 +37,23 @@ class KMeansTwoFeatures:
 
         # plot
         plt.plot(self.cluster_range, sswc)
-        plt.title("Elbow Method for Estimating the Number of Clusters")
+        plt.title("Elbow Method to Estimate Number of Clusters KMeans Would Use")
         plt.xlabel("Number of Clusters")
         plt.ylabel("SSWC")
         plt.show()
+
+    def bic_method_gmm(self):
+        models = [GaussianMixture(clusters, random_state=42).fit(self.df) for clusters in self.cluster_range]
+        plt.plot(self.cluster_range, [m.bic(self.df) for m in models], label="BIC")
+        plt.legend(loc="best")
+        plt.xlabel("Number of Clusters")
+        plt.title("BIC Method to Estimate Number of Clusters GMM would Use")
+        plt.show()
+
+    def gmm_clustering(self):
+        em = GaussianMixture(n_components=8, random_state=42)
+        labels = em.fit_predict(self.df)
+        Plot(self.df, "GMM Clusters : 8", color=labels).scatter_plot()
 
     '''
     The function below computes the silhouette coefficient values per clusters
@@ -49,7 +63,7 @@ class KMeansTwoFeatures:
     scikit-learn 0.24.2 documentation, 2021)
     '''
 
-    def optimal_clusters(self):
+    def kmeans_clustering(self):
         for n_clusters in self.cluster_range:
             # create subplots
             fig, (ax1, ax2) = plt.subplots(1, 2)
@@ -61,19 +75,19 @@ class KMeansTwoFeatures:
 
             # the clustering performed using GMM with n_clusters
             cluster = KMeans(n_clusters=n_clusters, random_state=42)
-            cluster_predict = cluster.fit_predict(self.df)
+            labels = cluster.fit_predict(self.df)
 
             # calculate the silhouette score
-            silhouette_avg = silhouette_score(self.df, cluster_predict)
+            silhouette_avg = silhouette_score(self.df, labels)
             print("Number of clusters : ", n_clusters,
                   "-> Silhouette Score : ", silhouette_avg)
 
             # calculate silhouette score for each sample
-            silhouette_per_sample = silhouette_samples(self.df, cluster_predict)
+            silhouette_per_sample = silhouette_samples(self.df, labels)
             y_lower = 10
             for i in range(n_clusters):
                 # gather the silhouette score per samples belonging to the ith cluster
-                ith_cluster_silhouette_values = silhouette_per_sample[cluster_predict == i]
+                ith_cluster_silhouette_values = silhouette_per_sample[labels == i]
                 # sort them
                 ith_cluster_silhouette_values.sort()
 
@@ -103,7 +117,7 @@ class KMeansTwoFeatures:
 
             # 2nd Plot showing the actual clusters formed
             cmap = cm.get_cmap("Spectral")
-            colors = cmap(cluster_predict.astype(float) / n_clusters)
+            colors = cmap(labels.astype(float) / n_clusters)
             ax2.scatter(self.df.X1, self.df.X2, marker='.', s=30, lw=0, alpha=0.7,
                         c=colors, edgecolor='k')
 
@@ -123,13 +137,17 @@ class KMeansTwoFeatures:
                 plt.suptitle(("Silhouette analysis for KMeans clustering on sample data "
                               "with n_clusters = %d" % n_clusters),
                              fontsize=14, fontweight='bold')
+
         plt.show()
 
 
 df = pd.read_csv("GMMData.csv")
-Plot(df, "Raw GMMData", df.X2).scatter_plot()
-cluster_range = [2, 3, 4, 5, 6, 7, 8, 9, 10]
-model = KMeansTwoFeatures(df, cluster_range)
+raw_data = Plot(df, "Raw GMMData", df.X2)
+# .scatter_plot()
+cluster_range = np.arange(2, 10)
+model = TwoFeatureClustering(df, cluster_range)
 model.standardize()
-model.elbow_method()
-model.optimal_clusters()
+# model.bic_method_gmm()
+model.gmm_clustering()
+# model.elbow_method_kmeans()
+# model.kmeans_clustering()
